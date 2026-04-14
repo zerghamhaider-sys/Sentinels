@@ -288,10 +288,12 @@ act_mon = [float(df_act[m].sum()) for m in MONTHS]
 
 TOTAL_FC    = fc_tot.get("FC_Rev", df_fc["FC_Rev"].sum())
 TOTAL_ACT   = ac_tot.get("YTD",   sum(act_mon))
-YTD_PCT     = pct_m.get("YTD", 0.0)
-TOTAL_VAR   = var_m.get("YTD", TOTAL_ACT - sum(
-    fc_mon[MONTHS.index(m)] for m in MONTHS if act_mon[MONTHS.index(m)] > 0
-))
+
+# Always compute from raw data — sheet variance/pct cells may be blank or zero
+rep_temp    = [m for m in MONTHS if act_mon[MONTHS.index(m)] > 0]
+FC_YTD_COMP = sum(fc_mon[MONTHS.index(m)] for m in rep_temp)
+TOTAL_VAR   = TOTAL_ACT - FC_YTD_COMP
+YTD_PCT     = (TOTAL_ACT / FC_YTD_COMP * 100) if FC_YTD_COMP > 0 else 0.0
 
 rep   = [m for m in MONTHS if act_mon[MONTHS.index(m)] > 0]   # reported months
 n_rep = len(rep)
@@ -456,8 +458,8 @@ if rep:
         mi     = MONTHS.index(m)
         act_v  = act_mon[mi]
         fc_v   = fc_mon[mi]
-        var_v  = var_m.get(m, act_v - fc_v)
-        pct_v  = pct_m.get(m, (act_v / fc_v * 100) if fc_v else 0)
+        var_v  = act_v - fc_v  # always computed — sheet cells may be blank
+        pct_v  = (act_v / fc_v * 100) if fc_v > 0 else 0
         clr    = GREEN if pct_v >= 100 else (GOLD if pct_v >= 80 else CRIMSON)
         vc     = GREEN if var_v >= 0 else CRIMSON
         with col:
