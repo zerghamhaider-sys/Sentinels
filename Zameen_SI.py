@@ -299,10 +299,12 @@ n_rep = len(rep)
 # ─────────────────────────────────────────────────────────────────
 # UTIL FUNCTIONS
 # ─────────────────────────────────────────────────────────────────
-def fmt(n, short=False):
+def fmt(n, short=False, signed=False):
+    """Format PKR value. signed=True prepends +/- for non-zero values."""
     if n == 0: return "—"
-    sign = "−" if n < 0 else ""
-    a = abs(n)
+    neg  = n < 0
+    a    = abs(n)
+    sign = ("−" if neg else ("+" if signed else ""))
     if short:
         if a >= 1e9: return f"{sign}₨{a/1e9:.1f}B"
         if a >= 1e6: return f"{sign}₨{a/1e6:.1f}M"
@@ -458,7 +460,6 @@ if rep:
         pct_v  = pct_m.get(m, (act_v / fc_v * 100) if fc_v else 0)
         clr    = GREEN if pct_v >= 100 else (GOLD if pct_v >= 80 else CRIMSON)
         vc     = GREEN if var_v >= 0 else CRIMSON
-        vs     = "+" if var_v >= 0 else ""
         with col:
             st.markdown(f"""
             <div style="background:{CARD};border:1px solid {BORDER};border-radius:12px;
@@ -483,7 +484,7 @@ if rep:
               {pct_bar(pct_v, clr)}
               <div style="font-size:0.65rem;color:{vc};margin-top:0.6rem;
                    font-family:'JetBrains Mono',monospace;">
-                {vs}{fmt(abs(var_v))} vs plan
+                {fmt(var_v, signed=True)} vs plan
               </div>
             </div>""", unsafe_allow_html=True)
 
@@ -662,7 +663,6 @@ with tab1:
             for name, fc_v, act_v, pct_v, var_v in sorted_inits:
                 clr = GREEN if pct_v >= 100 else (GOLD if pct_v >= 80 else CRIMSON)
                 vc  = GREEN if var_v >= 0 else CRIMSON
-                vs  = "+" if var_v >= 0 else ""
                 bar_w = min(pct_v, 100)
                 short_name = name[:22] + "…" if len(name) > 22 else name
                 rows_html += f"""
@@ -688,7 +688,7 @@ with tab1:
                   </td>
                   <td style="padding:0.7rem 0.6rem;border-bottom:1px solid {BORDER};
                        text-align:right;font-family:'JetBrains Mono',monospace;
-                       font-size:0.7rem;color:{vc};">{vs}{fmt(abs(var_v), short=True)}</td>
+                       font-size:0.7rem;color:{vc};">{fmt(var_v, short=True, signed=True)}</td>
                 </tr>"""
 
             st.markdown(f"""
@@ -872,7 +872,7 @@ with tab2:
             var_tds += td("—", MUTED)
         else:
             c = GREEN if v > 0 else (CRIMSON if v < 0 else MUTED)
-            var_tds += td(("+" if v>0 else "") + fmt(v, short=True), c, bold=True)
+            var_tds += td(fmt(v, short=True, signed=True), c, bold=True)
 
     row_lbl = (f'<td style="padding:0.55rem 1rem;border-bottom:1px solid {BORDER};'
                f'font-size:0.7rem;font-weight:700;white-space:nowrap;')
@@ -1091,7 +1091,7 @@ with tab4:
                 init,
                 fmt(float(fc_r["FC_Rev"])),
                 fmt(rfc), fmt(ract),
-                ("+" if vv >= 0 else "") + fmt(vv),
+                fmt(vv, signed=True),
                 pp, status,
             ])
         cols_h = ["Initiative","Full-Year FC","YTD FC","YTD Actual",
@@ -1145,7 +1145,7 @@ with tab4:
       <div style="width:1px;height:30px;background:{BORDER};"></div>
       {pill("YTD Actual",     fmt(TOTAL_ACT),         GREEN)}
       <div style="width:1px;height:30px;background:{BORDER};"></div>
-      {pill("YTD Variance",   ("+" if TOTAL_VAR>=0 else "") + fmt(TOTAL_VAR), var_c)}
+      {pill("YTD Variance",   fmt(TOTAL_VAR, signed=True), var_c)}
       <div style="width:1px;height:30px;background:{BORDER};"></div>
       {pill("Achievement",    f"{YTD_PCT:.0f}%",      TEXT)}
       <div style="width:1px;height:30px;background:{BORDER};"></div>
