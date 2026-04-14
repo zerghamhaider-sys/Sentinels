@@ -22,27 +22,52 @@ st.set_page_config(
 # ─────────────────────────────────────────────────────────────────
 # DESIGN TOKENS
 # ─────────────────────────────────────────────────────────────────
-BG      = "#0E1117"
-CARD    = "#161B22"
-CARD2   = "#1C2333"
-GREEN   = "#00A651"
-GOLD    = "#C9A050"
-CRIMSON = "#FF4B4B"
-BLUE    = "#4A9EFF"
-TEXT    = "#E0E0E0"
-MUTED   = "#8B949E"
-BORDER  = "#21262D"
+# ── Theme state ───────────────────────────────────────────────────
+if "dark_mode" not in st.session_state:
+    st.session_state.dark_mode = True
 
-# Pre-built rgba strings — no 8-char hex anywhere
-G_DIM   = "rgba(0,166,81,0.10)"
-G_MED   = "rgba(0,166,81,0.35)"
-G_LINE  = "rgba(0,166,81,0.70)"
-G_FILL  = "rgba(0,166,81,0.12)"
-AU_DIM  = "rgba(201,160,80,0.10)"
-AU_MED  = "rgba(201,160,80,0.40)"
-AU_LINE = "rgba(201,160,80,0.80)"
-R_DIM   = "rgba(255,75,75,0.10)"
-B_DIM   = "rgba(33,38,45,0.50)"
+DARK = st.session_state.dark_mode
+
+# ── Dynamic colour tokens ─────────────────────────────────────────
+if DARK:
+    BG      = "#0E1117"
+    CARD    = "#161B22"
+    CARD2   = "#1C2333"
+    GREEN   = "#00A651"
+    GOLD    = "#C9A050"
+    CRIMSON = "#FF4B4B"
+    BLUE    = "#4A9EFF"
+    TEXT    = "#E0E0E0"
+    MUTED   = "#8B949E"
+    BORDER  = "#21262D"
+    CHART_PAPER = "rgba(0,0,0,0)"
+    CHART_PLOT  = "rgba(0,0,0,0)"
+    METRIC_VAL  = "#ffffff"
+else:
+    BG      = "#F5F7FA"
+    CARD    = "#FFFFFF"
+    CARD2   = "#EEF2F7"
+    GREEN   = "#007A3D"
+    GOLD    = "#A07828"
+    CRIMSON = "#D32F2F"
+    BLUE    = "#1565C0"
+    TEXT    = "#1A1A2E"
+    MUTED   = "#5A6A7A"
+    BORDER  = "#D0D8E4"
+    CHART_PAPER = "rgba(245,247,250,0)"
+    CHART_PLOT  = "rgba(245,247,250,0)"
+    METRIC_VAL  = "#1A1A2E"
+
+# Pre-built rgba strings
+G_DIM   = "rgba(0,166,81,0.10)"   if DARK else "rgba(0,122,61,0.08)"
+G_MED   = "rgba(0,166,81,0.35)"   if DARK else "rgba(0,122,61,0.25)"
+G_LINE  = "rgba(0,166,81,0.70)"   if DARK else "rgba(0,122,61,0.60)"
+G_FILL  = "rgba(0,166,81,0.12)"   if DARK else "rgba(0,122,61,0.08)"
+AU_DIM  = "rgba(201,160,80,0.10)" if DARK else "rgba(160,120,40,0.08)"
+AU_MED  = "rgba(201,160,80,0.40)" if DARK else "rgba(160,120,40,0.30)"
+AU_LINE = "rgba(201,160,80,0.80)" if DARK else "rgba(160,120,40,0.70)"
+R_DIM   = "rgba(255,75,75,0.10)"  if DARK else "rgba(211,47,47,0.08)"
+B_DIM   = "rgba(33,38,45,0.50)"   if DARK else "rgba(208,216,228,0.60)"
 
 # ─────────────────────────────────────────────────────────────────
 # CSS
@@ -220,6 +245,17 @@ iframe {{
 ::-webkit-scrollbar-track {{ background:{BG}; }}
 ::-webkit-scrollbar-thumb {{ background:{BORDER}; border-radius:2px; }}
 
+/* ── LIGHT MODE EXTRAS ──────────────────────────────────── */
+div[data-baseweb="select"] * {{ color:{TEXT} !important; }}
+div[data-baseweb="select"] input {{ color:{TEXT} !important; }}
+[data-testid="baseButton-secondary"] {{
+    background:{CARD2} !important;
+    border:1px solid {BORDER} !important;
+    color:{TEXT} !important;
+}}
+[data-testid="stTabsContent"] {{ background:transparent !important; }}
+[data-testid="stSpinner"] {{ color:{TEXT} !important; }}
+
 /* ── ANIMATION ──────────────────────────────────────────── */
 @keyframes pulse {{
     0%,100% {{ opacity:1; }}
@@ -236,7 +272,7 @@ st.markdown(f"""
     const CARD  = '{CARD}';
     const TEXT  = '{TEXT}';
     const MUTED = '{MUTED}';
-    const WHITE = '#ffffff';
+    const WHITE = '{METRIC_VAL}';
 
     function applyStyles() {{
         // Force background on all wrappers
@@ -260,7 +296,7 @@ st.markdown(f"""
         document.querySelectorAll('[data-testid="metric-container"]').forEach(el => {{
             el.style.setProperty('background', CARD, 'important');
             el.style.setProperty('opacity', '1', 'important');
-            el.style.setProperty('border', '1px solid #21262D', 'important');
+            el.style.setProperty('border', '1px solid ' + '{BORDER}', 'important');
         }});
 
         // Force metric labels — these go dim
@@ -325,7 +361,7 @@ if not st.session_state.auth:
              padding:2.8rem;box-shadow:0 24px 64px rgba(0,0,0,0.55);text-align:center;">
           <div style="font-size:2.2rem;margin-bottom:0.4rem;">🏢</div>
           <div style="font-family:'Syne',sans-serif;font-size:1.7rem;font-weight:800;
-               color:#fff;letter-spacing:-0.03em;">
+               color:{TEXT};letter-spacing:-0.03em;">
                zameen<span style="color:{GREEN};">.com</span></div>
           <div style="color:{MUTED};font-size:0.65rem;letter-spacing:0.16em;
                text-transform:uppercase;margin:0.4rem 0 2rem;font-weight:700;">
@@ -504,7 +540,7 @@ def hdr(icon, title, sub=""):
       <div style="width:28px;height:28px;background:{G_DIM};border-radius:7px;
            border:1px solid {G_LINE}44;display:flex;align-items:center;
            justify-content:center;font-size:0.8rem;">{icon}</div>
-      <span style="font-weight:700;font-size:0.92rem;color:#fff;">{title}</span>{s}
+      <span style="font-weight:700;font-size:0.92rem;color:{TEXT};">{title}</span>{s}
     </div>""", unsafe_allow_html=True)
 
 # ─────────────────────────────────────────────────────────────────
@@ -565,10 +601,18 @@ def base_layout(height, title="", margin_r=20, legend=True,
 # ─────────────────────────────────────────────────────────────────
 # NAV BAR
 # ─────────────────────────────────────────────────────────────────
-col_refresh = st.button("↺", key="refresh_btn", help="Force refresh data")
-if col_refresh:
-    st.cache_data.clear()
-    st.rerun()
+# ── Theme toggle + Refresh ───────────────────────────────────────
+ctrl1, ctrl2, ctrl3 = st.columns([1, 1, 10])
+with ctrl1:
+    if st.button("↺", key="refresh_btn", help="Force refresh data"):
+        st.cache_data.clear()
+        st.rerun()
+with ctrl2:
+    theme_icon = "☀️" if DARK else "🌙"
+    theme_tip  = "Switch to Light Mode" if DARK else "Switch to Dark Mode"
+    if st.button(theme_icon, key="theme_btn", help=theme_tip):
+        st.session_state.dark_mode = not st.session_state.dark_mode
+        st.rerun()
 
 st.markdown(f"""
 <div style="background:{CARD};border-bottom:1px solid {BORDER};padding:0.9rem 2.2rem;
@@ -576,7 +620,7 @@ st.markdown(f"""
      margin:0 -2.2rem 1.8rem -2.2rem;">
   <div style="display:flex;align-items:center;gap:1rem;">
     <div style="font-family:'Syne',sans-serif;font-size:1.3rem;font-weight:800;
-         color:#fff;letter-spacing:-0.03em;">
+         color:{TEXT};letter-spacing:-0.03em;">
          zameen<span style="color:{GREEN};">.com</span></div>
     <div style="width:1px;height:20px;background:{BORDER};"></div>
     <div>
@@ -661,7 +705,7 @@ if rep:
                 </div>
               </div>
               <div style="font-family:'JetBrains Mono',monospace;font-size:1.25rem;
-                   font-weight:600;color:#fff;margin-bottom:2px;">{fmt(act_v)}</div>
+                   font-weight:600;color:{TEXT};margin-bottom:2px;">{fmt(act_v)}</div>
               <div style="font-size:0.65rem;color:{MUTED};margin-bottom:0.8rem;">
                    Forecast: <span style="color:{TEXT};font-family:'JetBrains Mono',monospace;">
                    {fmt(fc_v)}</span></div>
