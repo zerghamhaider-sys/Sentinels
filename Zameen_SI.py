@@ -339,6 +339,16 @@ def hdr(icon, title, sub=""):
 # CHART BUILDER — builds layout dict inline, NEVER shared/reused
 # so there can be NO key conflicts
 # ─────────────────────────────────────────────────────────────────
+def pill(label, val, color):
+    return (
+        f"<div>"
+        f"<div style=\"font-size:0.55rem;text-transform:uppercase;letter-spacing:0.12em;"
+        f"color:{MUTED};font-weight:700;margin-bottom:3px;\">{label}</div>"
+        f"<div style=\"font-family:JetBrains Mono,monospace;font-size:1rem;"
+        f"font-weight:600;color:{color};\">{val}</div>"
+        f"</div>"
+    )
+
 def base_layout(height, title="", margin_r=20, legend=True,
                 legend_y=-0.22, xside="bottom", show_x_ticks=True,
                 show_y_grid=True, show_x_grid=True):
@@ -1110,7 +1120,7 @@ with tab4:
     body_html = ""
     for row in display_rows:
         cells = "".join(f'<td style="{td_style}">{v}</td>' for v in row)
-        body_html += f'<tr style="transition:background 0.1s;" onmouseover="this.style.background=\'{CARD2}\'" onmouseout="this.style.background=\'\';">{cells}</tr>'
+        body_html += f"<tr>{cells}</tr>" 
 
     st.markdown(f"""
     <div style="background:{CARD};border:1px solid {BORDER};border-radius:12px;overflow:hidden;">
@@ -1131,14 +1141,6 @@ with tab4:
     # Summary bar
     st.markdown("<div style='height:10px'></div>", unsafe_allow_html=True)
     var_c = CRIMSON if TOTAL_VAR < 0 else GREEN
-    def pill(label, val, color):
-        return f"""
-        <div>
-          <div style="font-size:0.55rem;text-transform:uppercase;letter-spacing:0.12em;
-               color:{MUTED};font-weight:700;margin-bottom:3px;">{label}</div>
-          <div style="font-family:'JetBrains Mono',monospace;font-size:1rem;
-               font-weight:600;color:{color};">{val}</div>
-        </div>"""
 
     st.markdown(f"""
     <div style="background:{G_DIM};border:1px solid {G_LINE}44;border-radius:10px;
