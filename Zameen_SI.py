@@ -47,60 +47,125 @@ B_DIM   = "rgba(33,38,45,0.50)"
 # ─────────────────────────────────────────────────────────────────
 # CSS
 # ─────────────────────────────────────────────────────────────────
+# Inject Google Fonts via link tags (more reliable than @import in Streamlit)
+st.markdown("""
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+""", unsafe_allow_html=True)
+
 st.markdown(f"""
 <style>
-@import url('https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap');
+/* ── DESIGN SYSTEM ─────────────────────────────────────── */
+:root {{
+    --bg:      {BG};
+    --card:    {CARD};
+    --card2:   {CARD2};
+    --green:   {GREEN};
+    --gold:    {GOLD};
+    --crimson: {CRIMSON};
+    --text:    {TEXT};
+    --muted:   {MUTED};
+    --border:  {BORDER};
+}}
 
+/* ── RESET & BASE ──────────────────────────────────────── */
 *, *::before, *::after {{ box-sizing:border-box; margin:0; padding:0; }}
 
-html, body,
+/* Force dark background on EVERY Streamlit wrapper — fixes incognito dimming */
+html,
+body,
+[data-testid="stApp"],
 [data-testid="stAppViewContainer"],
-[data-testid="stApp"] {{
-    background:{BG} !important;
-    color:{TEXT} !important;
-    font-family:'Syne', sans-serif;
+[data-testid="stAppViewBlockContainer"],
+[data-testid="stVerticalBlock"],
+[data-testid="stHorizontalBlock"],
+[data-testid="stMain"],
+.main,
+.stApp,
+section[data-testid="stSidebar"],
+div[data-testid="stDecoration"],
+div[data-testid="stBottom"] {{
+    background-color: {BG} !important;
+    background:       {BG} !important;
+    color:            {TEXT} !important;
+    font-family:      'Syne', 'Segoe UI', system-ui, sans-serif !important;
+    opacity:          1 !important;
 }}
-[data-testid="stHeader"] {{ display:none !important; }}
-#MainMenu, footer, [data-testid="stToolbar"] {{ visibility:hidden; }}
-.block-container {{ padding:0 2.2rem 3rem 2.2rem !important; max-width:100% !important; }}
 
-/* Metrics */
-[data-testid="metric-container"] {{
-    background:{CARD} !important;
-    border:1px solid {BORDER} !important;
-    border-radius:12px !important;
-    padding:1.2rem 1.4rem !important;
-    position:relative; overflow:hidden;
+/* ── HIDE STREAMLIT CHROME ─────────────────────────────── */
+[data-testid="stHeader"],
+[data-testid="stToolbar"],
+[data-testid="stDecoration"],
+#MainMenu,
+footer {{ display:none !important; visibility:hidden !important; }}
+
+/* ── LAYOUT ────────────────────────────────────────────── */
+.block-container {{
+    padding:0 2.2rem 3rem 2.2rem !important;
+    max-width:100% !important;
+    background:{BG} !important;
 }}
-[data-testid="metric-container"]::after {{
+
+/* ── METRIC CARDS ──────────────────────────────────────── */
+[data-testid="metric-container"] {{
+    background:    {CARD} !important;
+    border:        1px solid {BORDER} !important;
+    border-radius: 12px !important;
+    padding:       1.2rem 1.4rem !important;
+    position:      relative !important;
+    overflow:      hidden !important;
+    opacity:       1 !important;
+}}
+[data-testid="metric-container"]::before {{
     content:'';
     position:absolute; top:0; left:0; right:0; height:2px;
     background:linear-gradient(90deg,{GREEN},transparent);
+    z-index:1;
 }}
-[data-testid="metric-container"] label {{
+/* Label */
+[data-testid="metric-container"] label,
+[data-testid="metric-container"] [data-testid="stMetricLabel"],
+[data-testid="metric-container"] [data-testid="stMetricLabel"] p,
+[data-testid="metric-container"] [data-testid="stMetricLabel"] div {{
     color:{MUTED} !important;
     font-size:0.62rem !important;
     letter-spacing:0.12em !important;
     text-transform:uppercase !important;
     font-weight:700 !important;
+    opacity:1 !important;
 }}
-[data-testid="metric-container"] [data-testid="stMetricValue"] {{
+/* Value */
+[data-testid="metric-container"] [data-testid="stMetricValue"],
+[data-testid="metric-container"] [data-testid="stMetricValue"] div {{
     color:#fff !important;
     font-size:1.45rem !important;
     font-weight:700 !important;
-    font-family:'JetBrains Mono', monospace !important;
+    font-family:'JetBrains Mono','Courier New',monospace !important;
     letter-spacing:-0.02em !important;
+    opacity:1 !important;
 }}
-[data-testid="metric-container"] [data-testid="stMetricDelta"] {{
+/* Delta */
+[data-testid="metric-container"] [data-testid="stMetricDelta"],
+[data-testid="metric-container"] [data-testid="stMetricDelta"] div {{
     font-size:0.72rem !important;
+    opacity:1 !important;
 }}
 
-/* Tabs */
+/* ── COLUMNS ────────────────────────────────────────────── */
+[data-testid="stHorizontalBlock"],
+[data-testid="column"] {{
+    background:transparent !important;
+    opacity:1 !important;
+}}
+
+/* ── TABS ───────────────────────────────────────────────── */
 [data-testid="stTabs"] [role="tablist"] {{
     background:{CARD} !important;
     border-radius:10px !important;
     border:1px solid {BORDER} !important;
-    padding:4px !important; gap:3px !important;
+    padding:4px !important;
+    gap:3px !important;
 }}
 [data-testid="stTabs"] [role="tab"] {{
     color:{MUTED} !important;
@@ -110,14 +175,20 @@ html, body,
     font-weight:700 !important;
     padding:0.4rem 1.1rem !important;
     border:none !important;
+    opacity:1 !important;
     transition:all 0.18s !important;
 }}
 [data-testid="stTabs"] [role="tab"][aria-selected="true"] {{
     background:{GREEN} !important;
     color:#fff !important;
+    opacity:1 !important;
+}}
+[data-testid="stTabs"] [role="tab"]:hover {{
+    color:{TEXT} !important;
+    opacity:1 !important;
 }}
 
-/* Select box */
+/* ── SELECTBOX ──────────────────────────────────────────── */
 div[data-baseweb="select"] > div {{
     background:{CARD2} !important;
     border:1px solid {BORDER} !important;
@@ -125,11 +196,31 @@ div[data-baseweb="select"] > div {{
 }}
 div[data-baseweb="select"] span {{ color:{TEXT} !important; }}
 
-/* Scrollbar */
+/* ── BUTTONS ────────────────────────────────────────────── */
+[data-testid="baseButton-secondary"],
+[data-testid="baseButton-primary"] {{
+    opacity:1 !important;
+}}
+
+/* ── TEXT ELEMENTS ──────────────────────────────────────── */
+p, span, div, label, h1, h2, h3, h4, h5, h6 {{
+    opacity:1 !important;
+}}
+
+/* ── PLOTLY CHARTS ──────────────────────────────────────── */
+.js-plotly-plot,
+[data-testid="stPlotlyChart"],
+iframe {{
+    opacity:1 !important;
+    background:transparent !important;
+}}
+
+/* ── SCROLLBAR ──────────────────────────────────────────── */
 ::-webkit-scrollbar {{ width:4px; height:4px; }}
 ::-webkit-scrollbar-track {{ background:{BG}; }}
 ::-webkit-scrollbar-thumb {{ background:{BORDER}; border-radius:2px; }}
 
+/* ── ANIMATION ──────────────────────────────────────────── */
 @keyframes pulse {{
     0%,100% {{ opacity:1; }}
     50%      {{ opacity:0.3; }}
