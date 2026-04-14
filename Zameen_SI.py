@@ -228,6 +228,87 @@ iframe {{
 </style>
 """, unsafe_allow_html=True)
 
+# JavaScript force-fix: runs after DOM loads, overrides Streamlit's internal opacity
+st.markdown(f"""
+<script>
+(function forceDarkTheme() {{
+    const BG    = '{BG}';
+    const CARD  = '{CARD}';
+    const TEXT  = '{TEXT}';
+    const MUTED = '{MUTED}';
+    const WHITE = '#ffffff';
+
+    function applyStyles() {{
+        // Force background on all wrappers
+        const bgSelectors = [
+            '[data-testid="stApp"]',
+            '[data-testid="stAppViewContainer"]',
+            '[data-testid="stAppViewBlockContainer"]',
+            '[data-testid="stMain"]',
+            '[data-testid="stVerticalBlock"]',
+            '.main', '.stApp', 'section.main'
+        ];
+        bgSelectors.forEach(sel => {{
+            document.querySelectorAll(sel).forEach(el => {{
+                el.style.setProperty('background-color', BG, 'important');
+                el.style.setProperty('background', BG, 'important');
+                el.style.setProperty('opacity', '1', 'important');
+            }});
+        }});
+
+        // Force metric cards
+        document.querySelectorAll('[data-testid="metric-container"]').forEach(el => {{
+            el.style.setProperty('background', CARD, 'important');
+            el.style.setProperty('opacity', '1', 'important');
+            el.style.setProperty('border', '1px solid #21262D', 'important');
+        }});
+
+        // Force metric labels — these go dim
+        document.querySelectorAll('[data-testid="stMetricLabel"], [data-testid="stMetricLabel"] *').forEach(el => {{
+            el.style.setProperty('color', MUTED, 'important');
+            el.style.setProperty('opacity', '1', 'important');
+        }});
+
+        // Force metric values — these go dim
+        document.querySelectorAll('[data-testid="stMetricValue"], [data-testid="stMetricValue"] *').forEach(el => {{
+            el.style.setProperty('color', WHITE, 'important');
+            el.style.setProperty('opacity', '1', 'important');
+        }});
+
+        // Force metric deltas
+        document.querySelectorAll('[data-testid="stMetricDelta"], [data-testid="stMetricDelta"] *').forEach(el => {{
+            el.style.setProperty('opacity', '1', 'important');
+        }});
+
+        // Force ALL text elements to full opacity
+        document.querySelectorAll('p, span, div, label, h1, h2, h3, h4, h5').forEach(el => {{
+            if (el.style.opacity && parseFloat(el.style.opacity) < 1) {{
+                el.style.setProperty('opacity', '1', 'important');
+            }}
+        }});
+
+        // Force columns
+        document.querySelectorAll('[data-testid="column"]').forEach(el => {{
+            el.style.setProperty('opacity', '1', 'important');
+            el.style.setProperty('background', 'transparent', 'important');
+        }});
+    }}
+
+    // Run immediately
+    applyStyles();
+
+    // Run again after short delays to catch Streamlit's late renders
+    [100, 300, 600, 1000, 2000].forEach(delay => {{
+        setTimeout(applyStyles, delay);
+    }});
+
+    // Watch for DOM changes (Streamlit re-renders components)
+    const observer = new MutationObserver(() => applyStyles());
+    observer.observe(document.body, {{ subtree: true, childList: true, attributes: true }});
+}})();
+</script>
+""", unsafe_allow_html=True)
+
 # ─────────────────────────────────────────────────────────────────
 # AUTH
 # ─────────────────────────────────────────────────────────────────
